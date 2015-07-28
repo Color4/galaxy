@@ -1,7 +1,7 @@
-define( ["libs/underscore", "viz/visualization", "viz/viz_views", "viz/trackster/util",
+define( ["libs/underscore", "viz/visualization", "viz/bbi-data-manager", "viz/viz_views", "viz/trackster/util",
          "viz/trackster/slotting", "viz/trackster/painters", "viz/trackster/filters",
          "mvc/data", "mvc/tools", "utils/config" ],
-         function(_, visualization, viz_views, util, slotting, painters, filters_mod, data, tools_mod, config_mod) {
+         function(_, visualization, bbi, viz_views, util, slotting, painters, filters_mod, data, tools_mod, config_mod) {
 
 var extend = _.extend;
 
@@ -3580,6 +3580,13 @@ extend(ReferenceTrack.prototype, Drawable.prototype, TiledTrack.prototype, {
 var LineTrack = function (view, container, obj_dict) {
     this.mode = "Histogram";
     TiledTrack.call(this, view, container, obj_dict);
+    // TODO: need a variable to toggle b/t generic data manager and BBI data manager.
+    // BBI can be used only when server supports HTTP Range header. Galaxy does
+    // not support this header, so an appropriately-configured proxy server is
+    // required to use BBI data manager.
+    this.data_manager = new bbi.BBIDataManager({
+        dataset: this.dataset
+    });
 };
 extend(LineTrack.prototype, Drawable.prototype, TiledTrack.prototype, {
     display_modes: CONTINUOUS_DATA_MODES,
