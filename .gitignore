@@ -83,9 +83,13 @@ tool-data/shared/ucsc/ucsc_build_sites.txt
 tool-data/*.loc
 tool-data/genome/*
 tool-data/*.sample
+tool-data/testtoolshed.g2.bx.psu.edu/
+tool-data/toolshed.g2.bx.psu.edu/
+
 
 # Test output
 test-data-cache
+run_framework_tests.html
 run_functional_tests.html
 run_api_tests.html
 test/tool_shed/tmp/*
@@ -119,4 +123,3 @@ doc/build
 .DS_Store
 *.rej
 *~
-
