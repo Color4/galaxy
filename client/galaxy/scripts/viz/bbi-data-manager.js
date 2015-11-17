@@ -19,22 +19,30 @@ define( ["viz/visualization", "libs/bbi/spans", "libs/bbi/sha1", "libs/bbi/bin",
                 self = this;
             bigwig.makeBwg(new bin.URLFetchable(url), function(bb, err) {
                 bb.readWigData(region.get("chrom"), region.get("start"), region.get("end"), function(data) {
-                    // Transform data into "bigwig" format.
-                    var result = data.map(function(d) {
-                            // Result is a 2-element array with [chrom_pos, score]
-                            return [
-                                // HACK: LineTrack painters use a single point rather than min/max. For now,
-                                // create single coordinate by using coordinate at midpoint of span. LineTrack
-                                // painter should be enhanced to use min, max attributes when available.
-                                Math.floor( d.min + (d.max - d.min)/2  ),
-                                d.score
-                            ];
-                        }),
-                        entry = {
+                    // Transform data into "bigwig" format. "bigwig" format is an array of 2-element arrays
+                    // where each array is [position, score].
+                    var result = [];
+                    data.forEach(function(d) {
+                        // Each data element includes a min and max. If min and max are the same,
+                        // then entry is single base-pair resolution and only a single data point
+                        // is added. Otherwise entry is multiple base pairs and two data points are
+                        // added, one for the start and one for the end.
+
+                        // Add data point for entry start.
+                        result.push([d.min, d.score]);
+
+                        if (d.min !== d.max) {
+                            // Multi base-pair entry, so two data points are generated.
+                            result.push([d.max, d.score]);
+                        }
+                    });
+
+                    var entry = {
                             data: result,
                             region: region,
                             dataset_type: 'bigwig'
                         };
+                    console.log(result);
 
                     self.set_data(region, entry);
                     deferred.resolve(entry);
