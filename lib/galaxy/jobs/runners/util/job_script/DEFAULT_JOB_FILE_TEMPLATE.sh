@@ -1,13 +1,7 @@
-#!/bin/sh
-
-# The following block can be used by the job creation system
-# to ensure this script is runnable before running it directly
-# or submitting it to a cluster manager.
-if [ -n "$ABC_TEST_JOB_SCRIPT_INTEGRITY_XYZ" ]; then
-    exit 42
-fi
+#!$shell
 
 $headers
+$integrity_injection
 $slots_statement
 export GALAXY_SLOTS
 GALAXY_LIB="$galaxy_lib"

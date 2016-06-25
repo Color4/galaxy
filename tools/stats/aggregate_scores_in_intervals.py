@@ -22,7 +22,7 @@ from bx.binned_array import BinnedArray, FileBinnedArray
 from bx.bitset_builders import binned_bitsets_from_file
 from bx.cookbook import doc_optparse
 
-from galaxy.tools.exception_handling import UCSCLimitException, UCSCOutWrapper
+from galaxy.util.ucsc import UCSCLimitException, UCSCOutWrapper
 
 
 class PositionalScoresOnDisk:
@@ -42,7 +42,7 @@ class PositionalScoresOnDisk:
         try:
             self.file.seek( i * self.fmt_size )
             return struct.unpack( self.fmt, self.file.read( self.fmt_size ) )[0]
-        except Exception, e:
+        except Exception as e:
             raise IndexError(e)
 
     def __setitem__( self, i, value ):

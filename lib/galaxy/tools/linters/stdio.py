@@ -1,3 +1,4 @@
+"""This module contains a linting functions for tool error detection."""
 from .command import get_command
 
 
@@ -39,7 +40,7 @@ def _lint_exit_code(child, lint_ctx):
 
 
 def _lint_regex(child, lint_ctx):
-    for key, value in child.attrib.iteritems():
+    for key, value in child.attrib.items():
         if key == "source":
             if value not in ["stderr", "stdout", "both"]:
                 lint_ctx.error("Unknown error code level encountered [%s]" % value)

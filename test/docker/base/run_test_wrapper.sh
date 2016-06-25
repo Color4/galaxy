@@ -8,7 +8,7 @@ then
     sleep 3
     GALAXY_TEST_INSTALL_DB_MERGED="true"
     GALAXY_TEST_DBURI="postgres://root@localhost:5930/galaxy?client_encoding=utf8"
-    TOOL_SHED_TEST_DBURI="postgres://root@localhost:5930/toolshed"
+    TOOL_SHED_TEST_DBURI="postgres://root@localhost:5930/toolshed?client_encoding=utf8"
 elif [ "$GALAXY_TEST_DATABASE_TYPE" = "mysql" ];
 then
     sh /opt/galaxy/start_mysql.sh
@@ -32,12 +32,15 @@ cd /galaxy
 GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION="$GALAXY_TEST_DBURI";
 export GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION
 
+: ${GALAXY_VIRTUAL_ENV:=.venv}
+
 ./scripts/common_startup.sh || { echo "common_startup.sh failed"; exit 1; }
 
 dev_requirements=./lib/galaxy/dependencies/dev-requirements.txt
-[ -f $dev_requirements ] && ./.venv/bin/pip install -r $dev_requirements
+[ -f $dev_requirements ] && $GALAXY_VIRTUAL_ENV/bin/pip install -r $dev_requirements
 
 sh manage_db.sh upgrade
+sh manage_db.sh upgrade tool_shed
 
 if [ -z "$GALAXY_NO_TESTS" ];
 then

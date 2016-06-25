@@ -9,6 +9,8 @@ define([
     "ui/hoverhighlight"
 ], function( HDCA, STATES, BASE_MVC, UI_MODAL, naturalSort, _l ){
 
+'use strict';
+
 var logNamespace = 'collections';
 /*==============================================================================
 TODO:
@@ -47,7 +49,7 @@ var DatasetCollectionElementView = Backbone.View.extend( BASE_MVC.LoggableMixin 
     //TODO: lots of unused space in the element - possibly load details and display them horiz.
     template : _.template([
         '<a class="name" title="', _l( 'Click to rename' ), '" href="javascript:void(0)">',
-            '<%= element.name %>',
+            '<%- element.name %>',
         '</a>',
         '<button class="discard btn btn-sm" title="', _l( 'Remove this dataset from the list' ), '">',
             _l( 'Discard' ),
@@ -698,7 +700,7 @@ var ListCollectionCreator = Backbone.View.extend( BASE_MVC.LoggableMixin ).exten
         //TODO: no need to re-create - move instead
         this.$( '.element-drop-placeholder' ).remove();
         var $placeholder = $( '<div class="element-drop-placeholder"></div>' );
-        if( !$nearest.size() ){
+        if( !$nearest.length ){
             $list.append( $placeholder );
         } else {
             $nearest.before( $placeholder );
@@ -745,7 +747,7 @@ var ListCollectionCreator = Backbone.View.extend( BASE_MVC.LoggableMixin ).exten
 
         // insert before the nearest element or after the last.
         var $nearest = this._getNearestElement( ev.clientY );
-        if( $nearest.size() ){
+        if( $nearest.length ){
             this.$dragging.insertBefore( $nearest );
         } else {
             // no nearest before - insert after last element
@@ -930,7 +932,7 @@ var ListCollectionCreator = Backbone.View.extend( BASE_MVC.LoggableMixin ).exten
         invalidElements : _.template([
             _l( 'The following selections could not be included due to problems:' ),
             '<ul><% _.each( problems, function( problem ){ %>',
-                '<li><b><%= problem.element.name %></b>: <%= problem.text %></li>',
+                '<li><b><%- problem.element.name %></b>: <%- problem.text %></li>',
             '<% }); %></ul>'
         ].join('')),
 
@@ -950,7 +952,7 @@ var ListCollectionCreator = Backbone.View.extend( BASE_MVC.LoggableMixin ).exten
                         '<% if( _.size( problems ) ){ %>',
                             _l( 'The following selections could not be included due to problems' ), ':',
                             '<ul><% _.each( problems, function( problem ){ %>',
-                                '<li><b><%= problem.element.name %></b>: <%= problem.text %></li>',
+                                '<li><b><%- problem.element.name %></b>: <%- problem.text %></li>',
                             '<% }); %></ul>',
                         '<% } else if( _.size( elements ) < 1 ){ %>',
                             _l( 'No datasets were selected' ), '.',
@@ -1008,7 +1010,7 @@ var collectionCreatorModal = function _collectionCreatorModal( elements, options
         title   : options.title || _l( 'Create a collection' ),
         body    : creator.$el,
         width   : '80%',
-        height  : 'min-content',
+        height  : '100%',
         closing_events: true
     });
     creator.render();

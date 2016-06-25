@@ -18,7 +18,7 @@ fi
 while :
 do
     case "$1" in
-        --skip-eggs|--skip-wheels|--skip-samples|--dev-wheels)
+        --skip-eggs|--skip-wheels|--skip-samples|--dev-wheels|--no-create-venv|--no-replace-pip|--replace-pip)
             common_startup_args="$common_startup_args $1"
             shift
             ;;
@@ -33,8 +33,14 @@ do
             stop_daemon_arg_set=1
             shift
             ;;
-        --daemon|restart)
-            paster_args="$paster_args $1"
+        --daemon|--restart|restart)
+            if [ "$1"=="--restart" ]
+            then
+                paster_args="$paster_args restart"
+            else
+                paster_args="$paster_args $1"
+            fi
+
             daemon_or_restart_arg_set=1
             shift
             ;;
@@ -56,11 +62,12 @@ done
 
 # If there is a .venv/ directory, assume it contains a virtualenv that we
 # should run this instance in.
-if [ -d .venv -a -z "$skip_venv" ];
+GALAXY_VIRTUAL_ENV="${GALAXY_VIRTUAL_ENV:-.venv}"
+if [ -d "$GALAXY_VIRTUAL_ENV" -a -z "$skip_venv" ];
 then
     [ -n "$PYTHONPATH" ] && { echo 'Unsetting $PYTHONPATH'; unset PYTHONPATH; }
-    printf "Activating virtualenv at %s/.venv\n" $(pwd)
-    . .venv/bin/activate
+    printf "Activating virtualenv at $GALAXY_VIRTUAL_ENV\n"
+    . "$GALAXY_VIRTUAL_ENV/bin/activate"
 fi
 
 # If you are using --skip-venv we assume you know what you are doing but warn

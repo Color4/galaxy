@@ -82,7 +82,7 @@ class CompressedFile( object ):
                     if os.path.exists( absolute_filepath ):
                         os.chmod( absolute_filepath, unix_permissions )
                     else:
-                        log.warn("Unable to change permission on extracted file '%s' as it does not exist" % absolute_filepath)
+                        log.warning("Unable to change permission on extracted file '%s' as it does not exist" % absolute_filepath)
         return os.path.abspath( os.path.join( extraction_path, common_prefix ) )
 
     def getmembers_tar( self ):
@@ -179,7 +179,7 @@ class Download( object ):
                     err_msg = 'Downloading from URL %s took longer than the defined timeout period of %.1f seconds.' % \
                         ( str( download_url ), basic_util.NO_OUTPUT_TIMEOUT )
                     raise Exception( err_msg )
-        except Exception, e:
+        except Exception as e:
             err_msg = err_msg = 'Error downloading from URL\n%s:\n%s' % ( str( download_url ), str( e ) )
             raise Exception( err_msg )
         finally:
@@ -239,10 +239,10 @@ class RecipeStep( object ):
 
     def execute_step( self, tool_dependency, package_name, actions, action_dict, filtered_actions, env_file_builder,
                       install_environment, work_dir, current_dir=None, initial_download=False ):
-        raise "Unimplemented Method"
+        raise Exception( "Unimplemented Method")
 
     def prepare_step( self, tool_dependency, action_elem, action_dict, install_environment, is_binary_download ):
-        raise "Unimplemented Method"
+        raise Exception( "Unimplemented Method" )
 
 
 class AssertDirectoryExecutable( RecipeStep ):
@@ -284,8 +284,7 @@ class AssertDirectoryExecutable( RecipeStep ):
             tool_dependency = tool_dependency_util.set_tool_dependency_attributes( self.app,
                                                                                    tool_dependency,
                                                                                    status=status,
-                                                                                   error_message=error_message,
-                                                                                   remove_from_disk=False )
+                                                                                   error_message=error_message )
         return tool_dependency, None, None
 
     def prepare_step( self, tool_dependency, action_elem, action_dict, install_environment, is_binary_download ):
@@ -330,8 +329,7 @@ class AssertDirectoryExists( RecipeStep ):
             tool_dependency = tool_dependency_util.set_tool_dependency_attributes( self.app,
                                                                                    tool_dependency,
                                                                                    status=status,
-                                                                                   error_message=error_message,
-                                                                                   remove_from_disk=False )
+                                                                                   error_message=error_message )
         return tool_dependency, None, None
 
     def prepare_step( self, tool_dependency, action_elem, action_dict, install_environment, is_binary_download ):
@@ -380,8 +378,7 @@ class AssertFileExecutable( RecipeStep ):
             tool_dependency = tool_dependency_util.set_tool_dependency_attributes( self.app,
                                                                                    tool_dependency,
                                                                                    status=status,
-                                                                                   error_message=error_message,
-                                                                                   remove_from_disk=False )
+                                                                                   error_message=error_message )
         return tool_dependency, None, None
 
     def prepare_step( self, tool_dependency, action_elem, action_dict, install_environment, is_binary_download ):
@@ -427,8 +424,7 @@ class AssertFileExists( RecipeStep ):
             tool_dependency = tool_dependency_util.set_tool_dependency_attributes( self.app,
                                                                                    tool_dependency,
                                                                                    status=status,
-                                                                                   error_message=error_message,
-                                                                                   remove_from_disk=False )
+                                                                                   error_message=error_message )
         return tool_dependency, None, None
 
     def prepare_step( self, tool_dependency, action_elem, action_dict, install_environment, is_binary_download ):
@@ -598,10 +594,10 @@ class DownloadBinary( Download, RecipeStep ):
         # Get the target directory for this download if the user has specified one. Default to the root of $INSTALL_DIR.
         target_directory = action_dict.get( 'target_directory', None )
         # Attempt to download a binary from the specified URL.
-        log.debug( 'Attempting to download from %s to %s', url, str( target_directory ) )
         downloaded_filename = None
         try:
             checksums = self.get_dict_checksums( action_dict )
+            log.debug( 'Attempting to download from %s to %s', url, str( target_directory ) )
             downloaded_filename = self.download_binary( url, work_dir, checksums )
             if initial_download:
                 # Filter out any actions that are not download_binary, chmod, or set_environment.
@@ -609,7 +605,7 @@ class DownloadBinary( Download, RecipeStep ):
                 # Set actions to the same, so that the current download_binary doesn't get re-run in the
                 # next stage.  TODO: this may no longer be necessary...
                 actions = [ item for item in filtered_actions ]
-        except Exception, e:
+        except Exception as e:
             log.exception( str( e ) )
             if initial_download:
                 # No binary exists, or there was an error downloading the binary from the generated URL.
@@ -679,7 +675,6 @@ class DownloadByUrl( Download, RecipeStep ):
             filtered_actions = actions[ 1: ]
         url = action_dict[ 'url' ]
         is_binary = action_dict.get( 'is_binary', False )
-        log.debug( 'Attempting to download via url: %s', url )
         if 'target_filename' in action_dict:
             # Sometimes compressed archives extract their content to a folder other than the default
             # defined file name.  Using this attribute will ensure that the file name is set appropriately
@@ -689,6 +684,7 @@ class DownloadByUrl( Download, RecipeStep ):
             downloaded_filename = os.path.split( url )[ -1 ]
 
         checksums = self.get_dict_checksums( action_dict )
+        log.debug( 'Attempting to download via url: %s', url )
         dir = self.url_download( work_dir, downloaded_filename, url, extract=True, checksums=checksums )
         if is_binary:
             log_file = os.path.join( install_environment.install_dir, basic_util.INSTALLATION_LOG )
@@ -714,7 +710,7 @@ class DownloadByUrl( Download, RecipeStep ):
         if is_binary_download:
             action_dict[ 'is_binary' ] = True
         if action_elem.text:
-            action_dict[ 'url' ] = action_elem.text
+            action_dict[ 'url' ] = action_elem.text.strip()
             target_filename = action_elem.get( 'target_filename', None )
             if target_filename:
                 action_dict[ 'target_filename' ] = target_filename
@@ -751,6 +747,7 @@ class DownloadFile( Download, RecipeStep ):
         if current_dir is not None:
             work_dir = current_dir
         checksums = self.get_dict_checksums( action_dict )
+        log.debug( 'Attempting to download via url: %s', url )
         self.url_download( work_dir, filename, url, extract=action_dict[ 'extract' ], checksums=checksums )
         if initial_download:
             dir = os.path.curdir
@@ -760,7 +757,7 @@ class DownloadFile( Download, RecipeStep ):
     def prepare_step( self, tool_dependency, action_elem, action_dict, install_environment, is_binary_download ):
         # <action type="download_file">http://effectors.org/download/version/TTSS_GUI-1.0.1.jar</action>
         if action_elem.text:
-            action_dict[ 'url' ] = action_elem.text
+            action_dict[ 'url' ] = action_elem.text.strip()
             target_filename = action_elem.get( 'target_filename', None )
             if target_filename:
                 action_dict[ 'target_filename' ] = target_filename
@@ -850,23 +847,17 @@ class MoveDirectoryFiles( RecipeStep ):
 
     def move_directory_files( self, current_dir, source_dir, destination_dir ):
         source_directory = os.path.abspath( os.path.join( current_dir, source_dir ) )
-        destination_directory = os.path.join( destination_dir )
-        if not os.path.isdir( destination_directory ):
-            os.makedirs( destination_directory )
-        symlinks = []
-        regular_files = []
-        for file_name in os.listdir( source_directory ):
-            source_file = os.path.join( source_directory, file_name )
-            destination_file = os.path.join( destination_directory, file_name )
-            files_tuple = ( source_file, destination_file )
-            if os.path.islink( source_file ):
-                symlinks.append( files_tuple )
+        destination_directory = os.path.abspath(os.path.join(destination_dir))
+        if not os.path.isdir(destination_directory):
+            os.makedirs(destination_directory)
+        for dir_entry in os.listdir(source_directory):
+            source_entry = os.path.join(source_directory, dir_entry)
+            if os.path.islink(source_entry):
+                destination_entry = os.path.join(destination_directory, dir_entry)
+                os.symlink(os.readlink(source_entry), destination_entry)
+                os.remove(source_entry)
             else:
-                regular_files.append( files_tuple )
-        for source_file, destination_file in symlinks:
-            shutil.move( source_file, destination_file )
-        for source_file, destination_file in regular_files:
-            shutil.move( source_file, destination_file )
+                shutil.move(source_entry, destination_directory)
 
     def prepare_step( self, tool_dependency, action_elem, action_dict, install_environment, is_binary_download ):
         # <action type="move_directory_files">
@@ -1342,7 +1333,7 @@ class SetupREnvironment( Download, RecipeStep ):
         #       <repository name="package_r_3_0_1" owner="bgruening">
         #           <package name="R" version="3.0.1" />
         #       </repository>
-        #       <!-- allow installing an R packages -->
+        #       <!-- allow installing one or more R packages -->
         #       <package sha256sum="7056b06041fd96ebea9c74f445906f1a5cd784b2b1573c02fcaee86a40f3034d">https://github.com/bgruening/download_store/raw/master/DESeq2-1_0_18/BiocGenerics_0.6.0.tar.gz</package>
         # </action>
         dir = None
@@ -1350,10 +1341,14 @@ class SetupREnvironment( Download, RecipeStep ):
             filtered_actions = actions[ 1: ]
         env_shell_file_paths = action_dict.get( 'env_shell_file_paths', None )
         if env_shell_file_paths is None:
-            log.debug( 'Missing R environment. Please check your specified R installation exists.' )
-            if initial_download:
-                return tool_dependency, filtered_actions, dir
-            return tool_dependency, None, None
+            error_message = 'Missing R environment. Please check your specified R installation exists.'
+            log.error( error_message )
+            status = self.app.install_model.ToolDependency.installation_status.ERROR
+            tool_dependency = tool_dependency_util.set_tool_dependency_attributes( self.app,
+                                                                                   tool_dependency,
+                                                                                   status=status,
+                                                                                   error_message=error_message )
+            return tool_dependency, [], None
         else:
             install_environment.add_env_shell_file_paths( env_shell_file_paths )
         log.debug( 'Handling setup_r_environment for tool dependency %s with install_environment.env_shell_file_paths:\n%s' %

@@ -1,5 +1,4 @@
-define( ["libs/underscore", "mvc/data", "viz/trackster/util", "utils/config"],
-        function(_, data_mod, util_mod, config_mod) {
+define( ["libs/underscore", "mvc/dataset/data", "viz/trackster/util", "utils/config"], function(_, data_mod, util_mod, config_mod) {
 
 /**
  * Mixin for returning custom JSON representation from toJSON. Class attribute to_json_keys defines a set of attributes
@@ -90,8 +89,7 @@ var select_datasets = function(dataset_url, add_track_async_url, filters, succes
 // --------- Models ---------
 
 /**
- * Canvas manager is used to create canvases, for browsers, this deals with
- * backward comparibility using excanvas, as well as providing a pattern cache
+ * Canvas manager is used to create canvases for browsers as well as providing a pattern cache
  */
 var CanvasManager = function(default_font) {
     this.default_font = default_font !== undefined ? default_font : "9px Monaco, Lucida Console, monospace";
@@ -116,7 +114,7 @@ _.extend( CanvasManager.prototype, {
         var patterns = this.patterns,
             dummy_context = this.dummy_context,
             image = new Image();
-        image.src = galaxy_config.root + "static/images" + path;
+        image.src = Galaxy.root + "static/images" + path;
         image.onload = function() {
             patterns[key] = dummy_context.createPattern( image, "repeat" );
         };
@@ -126,9 +124,6 @@ _.extend( CanvasManager.prototype, {
     },
     new_canvas: function() {
         var canvas = $("<canvas/>")[0];
-        // If using excanvas in IE, we need to explicately attach the canvas
-        // methods to the DOM element
-        if (window.G_vmlCanvasManager) { G_vmlCanvasManager.initElement(canvas); }
         // Keep a reference back to the manager
         canvas.manager = this;
         return canvas;
@@ -960,7 +955,7 @@ var Visualization = Backbone.Model.extend({
         type: ''
     },
 
-    urlRoot: galaxy_config.root + "api/visualizations",
+    urlRoot: Galaxy.root + "api/visualizations",
 
     /**
      * POSTs visualization's JSON to its URL using the parameter 'vis_json'
