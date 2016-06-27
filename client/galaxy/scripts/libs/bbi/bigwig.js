@@ -800,7 +800,7 @@ define(["libs/bbi/spans", "libs/bbi/jszlib", "libs/bbi/jquery-ajax-native"], fun
         // to choose the appropriate level. One data point ~= 25-65 bytes.
         // FIXME: For targeted sequencing, data points returned is going to be much lower,
         // so this will need to be tuned appropriately.
-        var MAX_DATA_POINTS = 25000;
+        var MAX_DATA_POINTS = 100000;
 
         var range = max - min,
         view;

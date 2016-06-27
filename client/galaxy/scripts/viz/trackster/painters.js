@@ -196,13 +196,23 @@ LinePainter.prototype.draw = function(ctx, width, height, w_scale) {
     ctx.beginPath();
 
     // Compute step size for each data point.
+    // FIXME:
     var x_scaled, y, delta_x_pxs;
     if (data.length > 1) {
-        delta_x_pxs = _.map(data.slice(0,-1), function(d, i) {
-            return Math.ceil((data[i+1][0] - data[i][0]) * w_scale);
-        });
-        // FIXME: For now, assume last point extends to end of the view.
-        delta_x_pxs.push( Math.ceil((this.view_end - data.slice(-1)[0][0]) * w_scale) );
+        if (data[0].length === 2) {
+            delta_x_pxs = _.map(data, function(d) {
+                return Math.ceil( (data[1][0] - data[0][0]) * w_scale);
+            });
+        }
+        else {
+            delta_x_pxs = _.map(data, function(d) {
+                if (d.max === d.min) {
+                    console.log(d);
+                    return w_scale;
+                }
+                return Math.ceil( (d.max - d.min) * w_scale);
+            });
+        }
     }
     else {
         delta_x_pxs = 10;
@@ -226,8 +236,9 @@ LinePainter.prototype.draw = function(ctx, width, height, w_scale) {
         top_overflow = bot_overflow = false;
         delta_x_px = delta_x_pxs[i];
 
-        x_scaled = Math.ceil((data[i][0] - view_start) * w_scale);
-        y = data[i][1];
+        // FIXME:
+        x_scaled = Math.ceil(( (data[i][0] || data[i].min) - view_start) * w_scale);
+        y = data[i][1] || data[i].score;
 
         // Process Y (scaler) value.
         if (y === null) {

@@ -19,35 +19,23 @@ define( ["viz/visualization", "libs/bbi/bigwig"],
                 self = this;
                 var promise = new $.Deferred();
                 $.when(bigwig.makeBwg(url)).then(function(bb, err) {
-                    $.when(bb.readWigData(region.get("chrom"), region.get("start"), region.get("end"))).then(function(data) {
-                    // Transform data into "bigwig" format. "bigwig" format is an array of 2-element arrays
-                    // where each array is [position, score].
-                    var result = [];
-                    data.forEach(function(d) {
-                        // Each data element includes a min and max. If min and max are the same,
-                        // then entry is single base-pair resolution and only a single data point
-                        // is added. Otherwise entry is multiple base pairs and two data points are
-                        // added, one for the start and one for the end.
+                    // Include 5 bps after region to ensure data is available for drawing entire region.
+                    $.when(bb.readWigData(region.get("chrom"), region.get("start"), region.get("end")+5)).then(function(data) {
+                        // Convert from wiggle 1-based coordinate system to Trackster 0-based coordinate system.
+                        _.each(data, function(d) {
+                            d.min -= 1;
+                        });
 
-                        // Add data point for entry start.
-                        result.push([d.min-1, d.score]);
+                        var entry = {
+                            data: data,
+                            region: region,
+                            dataset_type: 'bigwig'
+                        };
 
-                        if (d.min !== d.max) {
-                            // Multi base-pair entry, so two data points are generated.
-                            result.push([d.max-1, d.score]);
-                        }
+                        self.set_data(region, entry);
+                        deferred.resolve(entry);
                     });
-
-                    var entry = {
-                        data: result,
-                        region: region,
-                        dataset_type: 'bigwig'
-                    };
-
-                    self.set_data(region, entry);
-                    deferred.resolve(entry);
                 });
-            });
 
             return deferred;
         },
