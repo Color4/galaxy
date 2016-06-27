@@ -3089,7 +3089,7 @@ extend(TiledTrack.prototype, Drawable.prototype, Track.prototype, {
             this.config.set_value("min_value", 0);
         }
         if ( [undefined, null, 0].indexOf(this.config.get_value("max_value")) !== -1 ) {
-            this.config.set_value("max_value", _.max( _.map(result.data, function(d) { return d[1]; }) ) || 0);
+            this.config.set_value("max_value", _.max( _.map(result.data, function(d) { return d[1] || d.score; }) ) || 0);
         }
 
         var canvas = ctx.canvas,
