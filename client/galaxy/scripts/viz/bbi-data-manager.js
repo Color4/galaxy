@@ -30,19 +30,19 @@ define( ["viz/visualization", "libs/bbi/bigwig"],
                         // added, one for the start and one for the end.
 
                         // Add data point for entry start.
-                        result.push([d.min, d.score]);
+                        result.push([d.min-1, d.score]);
 
                         if (d.min !== d.max) {
                             // Multi base-pair entry, so two data points are generated.
-                            result.push([d.max, d.score]);
+                            result.push([d.max-1, d.score]);
                         }
                     });
 
                     var entry = {
-                            data: result,
-                            region: region,
-                            dataset_type: 'bigwig'
-                        };
+                        data: result,
+                        region: region,
+                        dataset_type: 'bigwig'
+                    };
 
                     self.set_data(region, entry);
                     deferred.resolve(entry);

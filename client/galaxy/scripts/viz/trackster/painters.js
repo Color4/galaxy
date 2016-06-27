@@ -194,12 +194,18 @@ LinePainter.prototype.draw = function(ctx, width, height, w_scale) {
     }
 
     ctx.beginPath();
-    var x_scaled, y, delta_x_px;
+
+    // Compute step size for each data point.
+    var x_scaled, y, delta_x_pxs;
     if (data.length > 1) {
-        delta_x_px = Math.ceil((data[1][0] - data[0][0]) * w_scale);
+        delta_x_pxs = _.map(data.slice(0,-1), function(d, i) {
+            return Math.ceil((data[i+1][0] - data[i][0]) * w_scale);
+        });
+        // FIXME: For now, assume last point extends to end of the view.
+        delta_x_pxs.push( Math.ceil((this.view_end - data.slice(-1)[0][0]) * w_scale) );
     }
     else {
-        delta_x_px = 10;
+        delta_x_pxs = 10;
     }
 
     // Painter color can be in either block_color (FeatureTrack) or color pref (LineTrack).
@@ -218,6 +224,7 @@ LinePainter.prototype.draw = function(ctx, width, height, w_scale) {
         // Reset attributes for next point.
         ctx.fillStyle = ctx.strokeStyle = painter_color;
         top_overflow = bot_overflow = false;
+        delta_x_px = delta_x_pxs[i];
 
         x_scaled = Math.ceil((data[i][0] - view_start) * w_scale);
         y = data[i][1];
