@@ -72,7 +72,6 @@
     padding: 2px 10px 2px 10px;
     margin-top: @ui-margin-vertical-large;
     margin-bottom: 0px;
-    float: left;
     width: 100%;
     display: none;
 }
@@ -152,7 +151,7 @@
             font-size: 0.8em;
             font-weight: normal;
             top: -1px;
-            word-break:break-word;
+            word-wrap:break-word;
         }
     }
     .button.disabled {
@@ -254,8 +253,9 @@
     margin-top: @ui-margin-vertical;
     margin-bottom: @ui-margin-vertical;
     overflow: visible;
+    clear: both;
     .ui-form-title {
-        word-break: break-word;
+        word-wrap: break-word;
         font-weight: bold;
         .ui-form-collapsible {
             cursor: pointer;
@@ -320,6 +320,7 @@
 .ui-form-info {
     &:extend(.toolParamHelp);
     clear: both !important;
+    word-wrap: break-word;
     i {
         font-size: 1.2em;
         padding: 2px 5px;
@@ -338,6 +339,12 @@
     }
 }
 
+.ui-form-section {
+    border-left: solid 3px @form-heading-bg;
+    border-radius: @border-radius-large !important;
+    padding-left: 10px;
+}
+
 .ui-form-composite {
     max-width: 900px;
     .ui-form-header {
@@ -348,7 +355,7 @@
         }
     }
     .ui-steps {
-        overflow: scroll;
+        overflow: auto;
         margin-top: 15px;
         border: dashed 1px darken(@form-heading-bg, 30%);
         border-radius: @border-radius-base;
@@ -385,10 +392,9 @@
         border-bottom: solid @form-border 1px;
         padding: 2px 8px;
         overflow: visible;
-        float: right;
         width:100%;
         .portlet-title {
-            word-break: break-word;
+            word-wrap: break-word;
             display: inline;
             vertical-align: middle;
             .portlet-title-text {
